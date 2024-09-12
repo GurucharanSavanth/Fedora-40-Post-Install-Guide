@@ -11,11 +11,9 @@ installonly_limit=3
 clean_requirements_on_remove=True 
 best=False 
 skip_if_unavailable=True 
-fastestmirror=1 
 max_parallel_downloads=10 
-deltarpm=true
 ``` 
-* Note: The `fastestmirror=1` plugin can be counterproductive at times, use it at your own discretion. Set it to `fastestmirror=0` if you are facing bad download speeds. Many users have reported better download speeds with the plugin enabled so it is there by default.
+* Note: The `fastestmirror=1` and `deltarpm=true` arguments were removed. Avoid using these even if you find them in other guides. They are counterproductive at best.
 
 ## RPM Fusion
 * Fedora has disabled the repositories for a lot of free and non-free .rpm packages by default. Follow this if you want to use non-free software like Steam, Discord and some multimedia codecs etc. As a general rule of thumb it is advised to do this to get access to many mainstream useful programs.
@@ -55,23 +53,24 @@ sudo fwupdmgr update
 * `modinfo -F version nvidia` #Check if the kernel module is built.
 * Reboot
 
-## Battery Life
-* Follow this if you have a Laptop and are facing sub optimal battery backup.
-* power-profiles-daemon which come pre-configured works great on a great majority of systems but still in case you're facing sub-optimal battery backup you try installing tlp by:
-* `sudo dnf install tlp tlp-rdw`
-* and mask power-profiles-daemon by:
-* `sudo systemctl mask power-profiles-daemon`
-* Also install powertop by:
-* `sudo dnf install powertop`
-* `sudo powertop --auto-tune`
+## ~~Battery Life (Deprecated)~~
+* ~~Follow this if you have a Laptop and are facing sub optimal battery backup.~~
+* ~~power-profiles-daemon which come pre-configured on fedora works well on a great majority of systems but still in case you're facing sub-optimal battery backup you try installing tlp by:~~
+* ~~`sudo dnf install tlp tlp-rdw`~~
+* ~~and mask power-profiles-daemon by:~~
+* ~~`sudo systemctl mask power-profiles-daemon`~~
+* ~~Also install powertop by:~~
+* ~~`sudo dnf install powertop`~~
+* ~~`sudo powertop --auto-tune`~~
+* Edit: Fedora comes preinstalled with PPD(power-profiles-daemon) which works well on its own now and all the aforementioned changes are now unnecessary. Just follow [HW video acceleration](https://github.com/devangshekhawat/Fedora-40-Post-Install-Guide/blob/main/README.md#hw-video-acceleration) for better battery backup. 
 
 ## Media Codecs
 * Install these to get proper multimedia playback.
 ````
 sudo dnf swap 'ffmpeg-free' 'ffmpeg' --allowerasing # Switch to full FFMPEG.
+sudo dnf group install Multimedia
 sudo dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin # Installs gstreamer components. Required if you use Gnome Videos and other dependent applications.
 sudo dnf update @sound-and-video # Installs useful Sound and Video complement packages.
-sudo dnf group install Multimedia
 ````
 
 ## H/W Video Acceleration
