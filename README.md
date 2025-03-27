@@ -1,31 +1,22 @@
- # Fedora 40 Post Install Guide
-Things to do after installing Fedora 40
+ # Fedora 41 Post Install Guide
+Things to do after installing Fedora 41
 
-## Faster Updates
-* `sudo nano /etc/dnf/dnf.conf` 
-* Copy and replace the text with the following:
-```
-[main] 
-gpgcheck=1 
-installonly_limit=3 
-clean_requirements_on_remove=True 
-best=False 
-skip_if_unavailable=True 
-max_parallel_downloads=10 
-``` 
-* Note: The `fastestmirror=1` and `deltarpm=true` arguments were removed. Avoid using these even if you find them in other guides. They are counterproductive at best.
+## Please read this if you can
+Hi, I have been going through a very tough stretch in life, and am actively looking for work to be able to support myself. I created this guide 3.5 years ago and this is the only place that has gained some traction where I could possibly ask out for help. I can be reached out to at devangshekhawat@protonmail.com if you know of anything that might be of help please write me a mail, I would be tremendously grateful to for any assistance that I can get.
+I hope you find the guide helpful! 
 
 ## RPM Fusion
 * Fedora has disabled the repositories for a lot of free and non-free .rpm packages by default. Follow this if you want to use non-free software like Steam, Discord and some multimedia codecs etc. As a general rule of thumb it is advised to do this to get access to many mainstream useful programs.
 * If you forgot to enable third party repositories during the initial setup window, enable them by pasting the following into the terminal: 
 * `sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm`
 * also while you're at it, install app-stream metadata by
-* `sudo dnf group update core`
+* `sudo dnf group upgrade core`
+* `sudo dnf4 group update core`
+  
 
 ## Update 
-* Go into the software center and click on update. Alternatively, you can use the following commands:
+* Go into the software center and click on update. Alternatively, you can do:
 * `sudo dnf -y update`
-* `sudo dnf -y upgrade --refresh`
 * Reboot
 
 ## Firmware
@@ -42,14 +33,17 @@ sudo fwupdmgr update
 
 ## NVIDIA Drivers
 * Only follow this if you have a NVIDIA gpu. Also, don't follow this if you have a gpu which has dropped support for newer driver releases i.e. anything earlier than nvidia GT/GTX 600, 700, 800, 900, 1000, 1600 and RTX 2000, 3000, 4000 series. Fedora comes preinstalled with NOUVEAU drivers which may or may not work better on those remaining older GPUs. This should be followed by Desktop and Laptop users alike.
-* Disable Secure Boot.
+* `sudo dnf install kmodtool akmods mokutil openssl` #To auto sign kernel modules
+* Reboot
+* `sudo mokutil --import /etc/pki/akmods/certs/public_key.der` #Initiate key enrollment. You'll be asked to create a password--it can be anything, you'll only use it once.
+* Reboot. The MOK Manager will appear. Select "Enroll MOK" and enter the password you just created. Then "Continue boot"
 * `sudo dnf update` #To make sure you're on the latest kernel and then reboot.
 * Enable RPM Fusion Nvidia non-free repository in the app store and install it from there,
 * or alternatively
 * `sudo dnf install akmod-nvidia`
 * Install this if you use applications that can utilise CUDA i.e. Davinci Resolve, Blender etc.
 * `sudo dnf install xorg-x11-drv-nvidia-cuda`
-* Wait for atleast 5 mins before rebooting, to let the kermel module get built.
+* Wait for atleast 5 mins before rebooting, to let the kernel module get built.
 * `modinfo -F version nvidia` #Check if the kernel module is built.
 * Reboot
 
@@ -62,28 +56,29 @@ sudo fwupdmgr update
 * ~~Also install powertop by:~~
 * ~~`sudo dnf install powertop`~~
 * ~~`sudo powertop --auto-tune`~~
-* Edit: Fedora comes preinstalled with PPD(power-profiles-daemon) which works well on its own now and all the aforementioned changes are now unnecessary. Just follow [HW video acceleration](https://github.com/devangshekhawat/Fedora-40-Post-Install-Guide/blob/main/README.md#hw-video-acceleration) for better battery backup. 
+* Edit: Fedora comes preinstalled with [Tuned](https://fedoraproject.org/wiki/Changes/TunedAsTheDefaultPowerProfileManagementDaemon) which works well on its own now and all the aforementioned changes are now unnecessary. Just follow [HW video acceleration](https://github.com/devangshekhawat/Fedora-40-Post-Install-Guide/blob/main/README.md#hw-video-acceleration) for better battery backup. 
 
 ## Media Codecs
 * Install these to get proper multimedia playback.
 ````
 sudo dnf swap 'ffmpeg-free' 'ffmpeg' --allowerasing # Switch to full FFMPEG.
-sudo dnf group install Multimedia
-sudo dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin # Installs gstreamer components. Required if you use Gnome Videos and other dependent applications.
-sudo dnf update @sound-and-video # Installs useful Sound and Video complement packages.
+sudo dnf4 group upgrade multimedia
+sudo dnf upgrade @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin # Installs gstreamer components. Required if you use Gnome Videos and other dependent applications.
+sudo dnf group install -y sound-and-video # Installs useful Sound and Video complement packages.
 ````
 
 ## H/W Video Acceleration
 * Helps decrease load on the CPU when watching videos online by alloting the rendering to the dGPU/iGPU. Quite helpful in increasing battery backup on laptops.
 
 ### H/W Video Decoding with VA-API 
-* `sudo dnf install ffmpeg ffmpeg-libs libva libva-utils`
+* `sudo dnf install ffmpeg-libs libva libva-utils`
 
 <details>
 <summary>Intel</summary>
  
 * If you have a recent Intel chipset (5th Gen and above) after installing the packages above., Do:
 * `sudo dnf swap libva-intel-media-driver intel-media-driver --allowerasing`
+* `sudo dnf install libva-intel-driver`
 </details>
 
 <details>
@@ -97,12 +92,16 @@ sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
 </details>
 
 ### OpenH264 for Firefox
-* `sudo dnf config-manager --set-enabled fedora-cisco-openh264`
 * `sudo dnf install -y openh264 gstreamer1-plugin-openh264 mozilla-openh264`
+* `sudo dnf config-manager setopt fedora-cisco-openh264.enabled=1`
 * After this enable the OpenH264 Plugin in Firefox's settings.
 
 ## Set Hostname
 * `hostnamectl set-hostname YOUR_HOSTNAME`
+
+## Default Firefox start page 
+* The tweak below will make the start page the default firefox start page instead of [this](https://fedoraproject.org/start)
+* `sudo rm -f /usr/lib64/firefox/browser/defaults/preferences/firefox-redhat-default-prefs.js`
 
 ## Custom DNS Servers
 * For people that want to setup custom DNS servers for better privacy
@@ -125,11 +124,6 @@ DNSOverTLS=yes
 * Modern intel CPUs (above 10th gen) do not gain noticeable performance improvements upon disabling mitigations. Hence, disabling mitigations can present some security risks against various attacks, however, it still _might_ increase the CPU performance of your system.
 * `sudo grubby --update-kernel=ALL --args="mitigations=off"`
 
-### Modern Standby
-* Can result in better battery life when your laptop goes to sleep.
-* `sudo grubby --update-kernel=ALL --args="mem_sleep_default=s2idle"`
-* If "s2idle" doesn't work for you i.e. people with alder lake CPUs, then you might want to refer to [this](https://www.reddit.com/r/linuxhardware/comments/ng166t/s3_deep_sleep_not_working/)
-
 ### Enable nvidia-modeset 
 * Useful if you have a laptop with an Nvidia GPU. Necessary for some PRIME-related interoperability features.
 * `sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"`
@@ -145,7 +139,7 @@ DNSOverTLS=yes
 ## Gnome Extensions
 * Don't install these if you are using a different spin of Fedora.
 * Pop Shell - run `sudo dnf install -y gnome-shell-extension-pop-shell xprop` to install it.
-* [GSconnect](https://extensions.gnome.org/extension/1319/gsconnect/) - run `sudo dnf install nautilus-python` for full support.
+* [GSconnect](https://extensions.gnome.org/extension/1319/gsconnect/) - run `sudo dnf install nautilus-python` for full support. then `sudo firewall-cmd --permanent --zone=public --add-service=kdeconnect`
 * [Gesture Improvements](https://extensions.gnome.org/extension/4245/gesture-improvements/)
 * [Quick Settings Tweaker](https://github.com/qwreey75/quick-settings-tweaks)
 * [User Themes](https://extensions.gnome.org/extension/19/user-themes/)
