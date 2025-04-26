@@ -1,15 +1,18 @@
- # Fedora 41 Post Install Guide
-Things to do after installing Fedora 41
+ # Fedora 42 Post Install Guide
+Things to do after installing Fedora 42
 
 ## Please read this if you can
 Hi, I have been going through a very tough stretch in life, and am actively looking for work to be able to support myself. I created this guide 3.5 years ago and this is the only place that has gained some traction where I could possibly ask out for help. I can be reached out to at devangshekhawat@protonmail.com if you know of anything that might be of help please write me a mail, I would be tremendously grateful to for any assistance that I can get.
 I hope you find the guide helpful! 
 
-## RPM Fusion
+## RPM Fusion & Terra
+
 * Fedora has disabled the repositories for a lot of free and non-free .rpm packages by default. Follow this if you want to use non-free software like Steam, Discord and some multimedia codecs etc. As a general rule of thumb it is advised to do this to get access to many mainstream useful programs.
-* If you forgot to enable third party repositories during the initial setup window, enable them by pasting the following into the terminal: 
+* Enable third party repositories by pasting the following into the terminal: 
 * `sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm`
-* also while you're at it, install app-stream metadata by
+* For Terra:
+* `sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release`
+* also while you're at it, install app-stream metadata by:
 * `sudo dnf group upgrade core`
 * `sudo dnf4 group update core`
   
@@ -27,16 +30,20 @@ sudo fwupdmgr get-devices # Lists devices with available updates.
 sudo fwupdmgr get-updates # Fetches list of available updates.
 sudo fwupdmgr update
 ```
+
 ## Flatpak
 * Fedora doesn't include all non-free flatpaks by default. The command below enables access to all the flathub flatpaks. Particularly useful for users of Fedora KDE and other spins since they do not get the "Enable Third Party Repositories" option on initial boot.
 * `flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo`
 
+## AppImage
+
+* For Appimage support install fuse:
+* `sudo dnf in fuse`
+* You can also install an AppImage manager like [Gearlever](https://flathub.org/apps/it.mijorus.gearlever) for neater management. To do so, run the following command:
+* `flatpak install it.mijorus.gearlever` 
+
 ## NVIDIA Drivers
-* Only follow this if you have a NVIDIA gpu. Also, don't follow this if you have a gpu which has dropped support for newer driver releases i.e. anything earlier than nvidia GT/GTX 600, 700, 800, 900, 1000, 1600 and RTX 2000, 3000, 4000 series. Fedora comes preinstalled with NOUVEAU drivers which may or may not work better on those remaining older GPUs. This should be followed by Desktop and Laptop users alike.
-* `sudo dnf install kmodtool akmods mokutil openssl` #To auto sign kernel modules
-* Reboot
-* `sudo mokutil --import /etc/pki/akmods/certs/public_key.der` #Initiate key enrollment. You'll be asked to create a password--it can be anything, you'll only use it once.
-* Reboot. The MOK Manager will appear. Select "Enroll MOK" and enter the password you just created. Then "Continue boot"
+* Only follow this if you have a NVIDIA gpu. Also, don't follow this if you have a gpu which has dropped support for newer driver releases i.e. anything earlier than nvidia GT/GTX 600, 700, 800, 900, 1000, 1600 and RTX 2000, 3000, 4000, 5000 series. Fedora comes preinstalled with NOUVEAU drivers which may or may not work better on those remaining older GPUs. This should be followed by Desktop and Laptop users alike.
 * `sudo dnf update` #To make sure you're on the latest kernel and then reboot.
 * Enable RPM Fusion Nvidia non-free repository in the app store and install it from there,
 * or alternatively
@@ -61,10 +68,10 @@ sudo fwupdmgr update
 ## Media Codecs
 * Install these to get proper multimedia playback.
 ````
-sudo dnf swap 'ffmpeg-free' 'ffmpeg' --allowerasing # Switch to full FFMPEG.
 sudo dnf4 group upgrade multimedia
+sudo dnf swap 'ffmpeg-free' 'ffmpeg' --allowerasing # Switch to full FFMPEG.
 sudo dnf upgrade @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin # Installs gstreamer components. Required if you use Gnome Videos and other dependent applications.
-sudo dnf group install -y sound-and-video # Installs useful Sound and Video complement packages.
+sudo dnf group install -y sound-and-video # Installs useful Sound and Video complementary packages.
 ````
 
 ## H/W Video Acceleration
@@ -88,6 +95,8 @@ sudo dnf group install -y sound-and-video # Installs useful Sound and Video comp
 ```
 sudo dnf swap mesa-va-drivers mesa-va-drivers-freeworld
 sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+sudo dnf swap mesa-va-drivers.i686 mesa-va-drivers-freeworld.i686
+sudo dnf swap mesa-vdpau-drivers.i686 mesa-vdpau-drivers-freeworld.i686
 ```
 </details>
 
